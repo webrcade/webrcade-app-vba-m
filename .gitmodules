@@ -1,0 +1,4 @@
+[submodule "modules/gba.ninja"]
+	path = modules/gba.ninja
+	url = https://github.com/raz0red/gba.ninja.git
+	branch = webrcade
