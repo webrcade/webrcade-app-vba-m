@@ -1,7 +1,6 @@
 import {
   AppWrapper,
   DisplayLoop,
-  ScriptAudioProcessor,
   CIDS,
   LOG  
 } from "@webrcade/app-common"
@@ -29,7 +28,6 @@ export class Emulator extends AppWrapper {
     this.saveStatePath = null;
     this.checkSaves = false;
   }
-
 
   setRom(name, bytes, md5) {
     if (bytes.byteLength === 0) {
@@ -75,6 +73,8 @@ export class Emulator extends AppWrapper {
         case 3:
           input |= 16;
           break;
+        default:
+          break;
       }      
     }
     else if (controllers.isControlDown(0, CIDS.DOWN)) {
@@ -91,6 +91,8 @@ export class Emulator extends AppWrapper {
         case 3:
           input |= 32;
           break;
+        default:
+          break;  
       }              
     }
     if (controllers.isControlDown(0, CIDS.RIGHT)) {
@@ -107,6 +109,8 @@ export class Emulator extends AppWrapper {
         case 3:
           input |= 128;
           break;
+        default:
+          break;  
       }                    
     }
     else if (controllers.isControlDown(0, CIDS.LEFT)) {      
@@ -123,6 +127,8 @@ export class Emulator extends AppWrapper {
         case 3:
           input |= 64;
           break;
+        default:
+          break;  
       }                    
     }
     if (controllers.isControlDown(0, CIDS.B) || controllers.isControlDown(0, CIDS.X) ) {
