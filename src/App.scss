@@ -1,0 +1,33 @@
+#screen {  
+  border: 0;
+  margin: 0;
+  overflow: hidden;  
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;  
+  width: 96vw;
+  height: 96vh;
+  max-width: calc(96vh*1.5);
+  max-height: calc(96vw*.6667);
+  // border: 1px solid red;
+}
+
+.sideways {
+  width: 96vh !important;
+  height: 96vw !important;
+  max-width: calc(96vw*1.5) !important;
+  max-height: calc(96vh*.6667) !important;  
+}
+
+.rotate90 {
+  transform: translate(-50%, -50%) rotate(90deg) !important;
+}
+
+.rotate180 {
+  transform: translate(-50%, -50%) rotate(180deg) !important;
+}
+
+.rotate270 {
+  transform: translate(-50%, -50%) rotate(270deg) !important;
+}
