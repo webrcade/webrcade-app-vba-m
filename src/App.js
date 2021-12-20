@@ -1,11 +1,14 @@
 import {
   blobToStr,
   md5,  
+  romNameScorer,
+  AppRegistry,
   FetchAppData, 
   Resources, 
   Unzip, 
   UrlUtil, 
   WebrcadeApp, 
+  APP_TYPE_KEYS,
   LOG,
   TEXT_IDS 
 } from '@webrcade/app-common'
@@ -84,6 +87,15 @@ class App extends WebrcadeApp {
       }
 
       const { emulator } = this;
+      
+      // Determine extensions
+      const exts = 
+        AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, false);
+      const extsNotUnique = 
+        AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, true);
+
+      console.log(exts);
+      console.log(extsNotUnique);
 
       // Load emscripten and the ROM
       const uz = new Unzip();
@@ -92,7 +104,7 @@ class App extends WebrcadeApp {
       emulator.loadEmscriptenModule()
         .then(() => new FetchAppData(rom).fetch())
         .then(response => { LOG.info('downloaded.'); return response.blob() })
-        .then(blob => uz.unzip(blob, [".gba"]))
+        .then(blob => uz.unzip(blob, extsNotUnique, exts, romNameScorer))
         .then(blob => { romBlob = blob; return blob; })
         .then(blob => blobToStr(blob))
         .then(str => { romMd5 = md5(str); })
