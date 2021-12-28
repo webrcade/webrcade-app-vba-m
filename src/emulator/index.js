@@ -1,6 +1,7 @@
 import {
   AppWrapper,
   DisplayLoop,
+  ScriptAudioProcessor,
   CIDS,
   LOG  
 } from "@webrcade/app-common"
@@ -27,12 +28,24 @@ export class Emulator extends AppWrapper {
     this.mirroring = mirroring;
     this.saveStatePath = null;
     this.checkSaves = false;
+    this.isGba = true;
   }
 
-  setRom(name, bytes, md5) {
+  FPS = 59.7275;
+
+  createAudioProcessor() {
+    return new ScriptAudioProcessor(2, 44100);
+  }
+
+  setRom(isGba, name, bytes, md5) {
+    this.isGba = isGba;
     if (bytes.byteLength === 0) {
       throw new Error("The size is invalid (0 bytes).");
     }
+
+    this.GBA_CYCLES_PER_SECOND =  isGba ? 16777216 : 4194304;
+    this.GBA_CYCLES_PER_FRAME = this.GBA_CYCLES_PER_SECOND / this.FPS /*60*/;  
+
     this.romName = name;
     this.romMd5 = md5;
     this.romBytes = new Uint8Array(bytes);    
@@ -222,28 +235,15 @@ export class Emulator extends AppWrapper {
     } 
   }
 
-  GBA_CYCLES_PER_SECOND = 16777216;
-  GBA_CYCLES_PER_FRAME = this.GBA_CYCLES_PER_SECOND / 60;
-
   frame() {
-    const { vbaInterface, GBA_CYCLES_PER_SECOND, GBA_CYCLES_PER_FRAME } = this;
-
-    const now = Date.now();
-    const elapsed = now - this.lastTime;
-    this.lastTime = now;
-
-    let cycles = GBA_CYCLES_PER_FRAME;
-    if (elapsed < 50) {
-      cycles = GBA_CYCLES_PER_SECOND / (1000 / elapsed);
-    } 
-
-    vbaInterface.VBA_do_cycles(cycles);
+    const { vbaInterface, GBA_CYCLES_PER_FRAME } = this;
+    vbaInterface.VBA_do_cycles(GBA_CYCLES_PER_FRAME);
   }
 
   async onStart(canvas) {
-    const { app, audioProcessor, debug, romBytes, romMd5, vba } = this;
+    const { app, audioProcessor, debug, isGba, romBytes, romMd5, vba } = this;
 
-    this.vbaGraphics = new VbaGraphics(vba, canvas);
+    this.vbaGraphics = new VbaGraphics(isGba, vba, canvas);
     this.vbaGraphics.initScreen();
     this.vbaInterface = new VbaInterface(
       vba,
@@ -264,8 +264,12 @@ export class Emulator extends AppWrapper {
     this.displayLoop = new DisplayLoop(60, true, debug);
 
     // Start VBA
-    this.vbaInterface.VBA_start(this.flashSize, this.saveType, 
-      this.rtc, this.mirroring);
+    this.vbaInterface.VBA_start(
+      isGba ?  1 : 0, // isGba
+      this.flashSize, 
+      this.saveType, 
+      this.rtc, 
+      this.mirroring);
 
     // Hack to ignore always saving
     setTimeout(() => {
@@ -273,11 +277,6 @@ export class Emulator extends AppWrapper {
       this.checkSaves = true;
     }, 5 * 1000 );    
     
-    // Audio configuration    
-    const samples = (audioProcessor.getFrequency() / 
-      this.displayLoop.getFrequency()) | 0;
-    LOG.info("Samples: " + samples);
-
     // Start the audio processor
     this.audioProcessor.start();
 

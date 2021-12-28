@@ -1,13 +1,14 @@
 class VbaGraphics {
 
-  constructor(emscriptenModule, canvas) {
+  constructor(isGba, emscriptenModule, canvas) {
+    this.isGba = isGba;
+    this.GBA_WIDTH = isGba ? 240 : 162; 
+    this.GBA_HEIGHT = isGba ? 160 : 144;   
+
     this.emscriptenModule = emscriptenModule;
     this.canvas = canvas;
-    this.pixelCount = this.GBA_WIDTH * this.GBA_HEIGHT;
+    this.pixelCount = this.GBA_WIDTH * this.GBA_HEIGHT;    
   }
-
-  GBA_WIDTH = 240;
-  GBA_HEIGHT = 160;
 
   initScreen() {
     const { GBA_WIDTH, GBA_HEIGHT } = this;

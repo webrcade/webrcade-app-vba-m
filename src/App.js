@@ -20,6 +20,7 @@ class App extends WebrcadeApp {
   emulator = null;
   rotValue = 0;
   rotSideways = false;
+  isGba = false;
 
   componentDidMount() {
     super.componentDidMount();
@@ -27,6 +28,9 @@ class App extends WebrcadeApp {
     const { appProps, ModeEnum } = this;
 
     try {
+      // TODO: Make based on type, etc.
+      this.isGba = true;
+
       // Get the ROM location that was specified
       const rom = appProps.rom;
       if (!rom) throw new Error("A ROM file was not specified.");
@@ -107,6 +111,7 @@ class App extends WebrcadeApp {
         .then(str => { romMd5 = md5(str); })
         .then(() => new Response(romBlob).arrayBuffer())
         .then(bytes => emulator.setRom(
+          this.isGba,
           uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
           bytes,
           romMd5))
@@ -152,6 +157,12 @@ class App extends WebrcadeApp {
         className += " ";
       }
       className += "sideways";
+    }
+    if (!this.isGba) {
+      if (className.length > 0) {
+        className += " ";
+      }
+      className += "screen-gb";
     }
     return (
       <canvas className={className} ref={canvas => { this.canvas = canvas; }} id="screen"></canvas>

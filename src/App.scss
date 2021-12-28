@@ -13,6 +13,11 @@
   // border: 1px solid red;
 }
 
+.screen-gb {
+  max-width: calc(96vh*1.11) !important;
+  max-height: calc(96vw*.9) !important;
+}
+
 .sideways {
   width: 96vh !important;
   height: 96vw !important;
