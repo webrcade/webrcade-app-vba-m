@@ -1,6 +1,11 @@
+import {
+  LOG  
+} from "@webrcade/app-common"
+
 class VbaInterface {
 
-  constructor(gbaninja, romBuffer8, vbaGraphics, inputCb, audioProcessor) {
+  constructor(rate, gbaninja, romBuffer8, vbaGraphics, inputCb, audioProcessor) {
+    this.rate = rate;
     this.gbaninja = gbaninja;
     this.romBuffer8 = romBuffer8;
     this.vbaGraphics = vbaGraphics;
@@ -8,21 +13,33 @@ class VbaInterface {
     this.audioProcessor = audioProcessor;
     this.audioChannels = new Array(2);
     this.saveBuffer = new Uint8Array(0);
+    this.debug = false;
 
     const AUDIO_LENGTH = 8192;
     this.audioChannels[0] = new Array(AUDIO_LENGTH);
     this.audioChannels[1] = new Array(AUDIO_LENGTH);
   }  
 
+  setDebug(debug) {
+    this.debug = debug;
+    return this;
+  }
+
   VBA_get_emulating() {
     const { gbaninja } = this;
     return gbaninja._VBA_get_emulating();
   };
 
-  VBA_start(flashSize = -1, saveType = -1, rtc = false, mirroring = false) {
+  VBA_start(isGba, flashSize = -1, saveType = -1, rtc = false, mirroring = false, gbHwType = 0, gbColors = 0) {
     const { gbaninja } = this;
-    return gbaninja._VBA_start(flashSize, saveType, 
-      rtc ? 1 : 0, mirroring ? 1 : 0);
+    return gbaninja._VBA_start(
+      isGba,
+      flashSize, 
+      saveType, 
+      rtc ? 1 : 0, 
+      mirroring ? 1 : 0,
+      gbHwType,
+      gbColors);
   };
 
   VBA_do_cycles(cycles) {
@@ -128,7 +145,7 @@ class VbaInterface {
 
   getAudioSampleRate() {
     const { audioProcessor } = this;
-    return audioProcessor.getFrequency();
+    return audioProcessor.getFrequency() * (this.rate/60);
   };
 
   getRomSize(startPointer8) {
@@ -162,7 +179,35 @@ class VbaInterface {
 
   resumeSound() { };
 
+  start = Date.now();
+  sum = 0;
+  count = 0;
+
+  hacksum = 0;
+  HACKAT = 548;
+
   writeSound(pointer8, length16) {
+    // Horrible hack to work around too many samples
+    // coming from emulator.
+    // TODO: Fix this the right way in the future.
+    this.hacksum += length16 >> 1;    
+    if (this.hacksum >= this.HACKAT) {
+      length16 -= 2;
+      this.hacksum %= this.HACKAT;
+    }
+
+    if (this.debug) {
+      this.sum += (length16 >> 1);
+      if ((Date.now() - this.start) > 1000.0) {     
+        if ((this.count % 60) === 0) {
+          LOG.info((this.sum/60) + ", " + this.count );
+          this.sum = 0;
+        }         
+        this.start = Date.now();  
+        this.count++;
+      }    
+    }
+
     const { audioProcessor, gbaninja } = this;
 
     if (pointer8 % 2 === 1) {

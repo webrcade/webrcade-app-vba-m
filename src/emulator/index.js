@@ -28,22 +28,29 @@ export class Emulator extends AppWrapper {
     this.mirroring = mirroring;
     this.saveStatePath = null;
     this.checkSaves = false;
-    this.isGba = true;
+    this.isGba = false;
+    this.type = null;
+    this.gbHwType = 0;
+    this.gbColors = 0;
   }
 
   FPS = 59.7275;
 
   createAudioProcessor() {
-    return new ScriptAudioProcessor(2, 44100);
+    return new ScriptAudioProcessor(2, 48000).setDebug(this.debug);
   }
 
-  setRom(isGba, name, bytes, md5) {
-    this.isGba = isGba;
+  setRom(isGba, type, name, bytes, md5, gbHwType, gbColors) {
+    this.type = type;
     if (bytes.byteLength === 0) {
       throw new Error("The size is invalid (0 bytes).");
     }
 
-    this.GBA_CYCLES_PER_SECOND =  isGba ? 16777216 : 4194304;
+    this.isGba = isGba;
+    this.gbHwType = gbHwType;
+    this.gbColors = gbColors;
+
+    this.GBA_CYCLES_PER_SECOND = isGba ? 16777216 : 4194304;
     this.GBA_CYCLES_PER_FRAME = this.GBA_CYCLES_PER_SECOND / this.FPS /*60*/;  
 
     this.romName = name;
@@ -246,12 +253,13 @@ export class Emulator extends AppWrapper {
     this.vbaGraphics = new VbaGraphics(isGba, vba, canvas);
     this.vbaGraphics.initScreen();
     this.vbaInterface = new VbaInterface(
+      this.FPS,
       vba,
       romBytes,
       this.vbaGraphics,
       () => { return this.controllerState; },
       audioProcessor
-    );
+    ).setDebug(this.debug);
 
     // For callbacks from Emscripten
     window.VBAInterface = this.vbaInterface;
@@ -269,7 +277,9 @@ export class Emulator extends AppWrapper {
       this.flashSize, 
       this.saveType, 
       this.rtc, 
-      this.mirroring);
+      this.mirroring,
+      this.gbHwType,
+      this.gbColors);
 
     // Hack to ignore always saving
     setTimeout(() => {

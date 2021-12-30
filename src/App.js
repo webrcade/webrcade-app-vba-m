@@ -28,9 +28,6 @@ class App extends WebrcadeApp {
     const { appProps, ModeEnum } = this;
 
     try {
-      // TODO: Make based on type, etc.
-      this.isGba = true;
-
       // Get the ROM location that was specified
       const rom = appProps.rom;
       if (!rom) throw new Error("A ROM file was not specified.");
@@ -83,21 +80,45 @@ class App extends WebrcadeApp {
       // Get Mirroring
       const mirroring = appProps.mirroring !== undefined ? appProps.mirroring === true : false;
 
+      // Get GB hardware type
+      const gbHwType = appProps.hwType !== undefined ? parseInt(appProps.hwType) : 0;
+
+      // Get GB colors
+      const gbColors = appProps.colors !== undefined ? parseInt(appProps.colors) : 0;
+
+      // Get the type
+      const type = appProps.type;
+      if (!type) throw new Error("The application type was not specified.");
+      this.isGba = (type === APP_TYPE_KEYS.VBA_M_GBA);
+
       // Create the emulator
       if (this.emulator === null) {
         this.emulator = new Emulator(
-          this, this.rotValue, this.isDebug(),
-          flashSize, saveType, rtc, mirroring);
+          this, 
+          this.rotValue, 
+          this.isDebug(),
+          flashSize, 
+          saveType, 
+          rtc, 
+          mirroring
+        );
       }
 
       const { emulator } = this;
       
       // Determine extensions
-      const exts = 
-        AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, false);
-      const extsNotUnique = 
-        AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, true);
-
+      const exts = [
+        ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, false),
+        ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GB, true, false),
+        ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBC, true, false),
+      ];
+      const extsNotUnique = [
+        ...new Set([
+          ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, true),
+          ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GB, true, true),
+          ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBC, true, true),
+        ])
+      ];
       // Load emscripten and the ROM
       const uz = new Unzip().setDebug(this.isDebug());
       let romBlob = null;
@@ -111,10 +132,10 @@ class App extends WebrcadeApp {
         .then(str => { romMd5 = md5(str); })
         .then(() => new Response(romBlob).arrayBuffer())
         .then(bytes => emulator.setRom(
-          this.isGba,
-          uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
-          bytes,
-          romMd5))
+          this.isGba, type, uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
+          bytes, romMd5, 
+          (type === APP_TYPE_KEYS.VBA_M_GB ? gbHwType : 1),
+          gbColors))
         .then(() => this.setState({ mode: ModeEnum.LOADED }))
         .catch(msg => {
           LOG.error(msg);
