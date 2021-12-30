@@ -35,6 +35,7 @@ export class Emulator extends AppWrapper {
   }
 
   FPS = 59.7275;
+  SRAM_FILE = "/tmp/game.srm";
 
   createAudioProcessor() {
     return new ScriptAudioProcessor(2, 48000).setDebug(this.debug);
@@ -193,6 +194,7 @@ export class Emulator extends AppWrapper {
         if (window.gbaninja) {
           window.gbaninja.then(vba => {
             this.vba = vba;
+            window.vba = vba;
             resolve();
           });
         } else {
@@ -203,7 +205,7 @@ export class Emulator extends AppWrapper {
   }
 
   async loadState() {
-    const { saveStatePath, storage, vbaInterface } = this;
+    const { isGba, saveStatePath, storage, vbaInterface, SRAM_FILE } = this;
     
     // Write the save state (if applicable)
     try {
@@ -211,7 +213,20 @@ export class Emulator extends AppWrapper {
       const s = await storage.get(saveStatePath);
       if (s) {
         LOG.info('reading sram.');
-        vbaInterface.setSaveBuffer(s);
+        if (isGba) {
+          vbaInterface.setSaveBuffer(s);
+        } else {
+          // GB/GBC uses the file system          
+          // Create the save path (MEM FS)
+          const FS = this.vba.FS;
+          const res = FS.analyzePath(SRAM_FILE, true);
+          if (!res.exists) {
+            const s = await storage.get(this.saveStatePath);
+            if (s) {
+              FS.writeFile(SRAM_FILE, s);
+            }
+          }    
+        }
       }
     } catch (e) {
       LOG.error(e);
@@ -219,7 +234,9 @@ export class Emulator extends AppWrapper {
   }
 
   async saveState() {
-    const { checkSaves, saveStatePath, started, storage, vbaInterface } = this;
+    const { 
+      checkSaves, isGba, saveStatePath, started, storage, vbaInterface, 
+      SRAM_FILE } = this;
     if (!started || !saveStatePath) {
       return;
     }
@@ -227,12 +244,26 @@ export class Emulator extends AppWrapper {
     try {
       if (checkSaves && vbaInterface.VBA_get_systemSaveUpdateCounter()) {
         LOG.info('saving sram.');
+        LOG.info(saveStatePath);
   
-        // Wrate state
+        // Write state
         vbaInterface.VBA_emuWriteBattery();
         
-        // Store it
-        await storage.put(saveStatePath, vbaInterface.getSaveBuffer());
+        // Store it        
+        if (isGba) {
+          await storage.put(saveStatePath, vbaInterface.getSaveBuffer());
+        } else {
+          // GB/GBC uses the file system          
+          const FS = this.vba.FS;
+          const res = FS.analyzePath(SRAM_FILE, true);
+          if (res.exists) {
+            const s = FS.readFile(SRAM_FILE);
+            if (s) {
+              await storage.put(saveStatePath, s);
+              LOG.info('sram saved: ' + s.length)
+            }
+          }          
+        }
   
         // Reset the storage update counter
         vbaInterface.VBA_reset_systemSaveUpdateCounter();
