@@ -32,6 +32,7 @@ export class Emulator extends AppWrapper {
     this.type = null;
     this.gbHwType = 0;
     this.gbColors = 0;
+    this.gbBorder = 0;
   }
 
   FPS = 59.7275;
@@ -41,7 +42,7 @@ export class Emulator extends AppWrapper {
     return new ScriptAudioProcessor(2, 48000).setDebug(this.debug);
   }
 
-  setRom(isGba, type, name, bytes, md5, gbHwType, gbColors) {
+  setRom(isGba, type, name, bytes, md5, gbHwType, gbColors, gbBorder) {
     this.type = type;
     if (bytes.byteLength === 0) {
       throw new Error("The size is invalid (0 bytes).");
@@ -50,6 +51,7 @@ export class Emulator extends AppWrapper {
     this.isGba = isGba;
     this.gbHwType = gbHwType;
     this.gbColors = gbColors;
+    this.gbBorder = gbBorder;
 
     this.GBA_CYCLES_PER_SECOND = isGba ? 16777216 : 4194304;
     this.GBA_CYCLES_PER_FRAME = this.GBA_CYCLES_PER_SECOND / this.FPS /*60*/;  
@@ -279,9 +281,9 @@ export class Emulator extends AppWrapper {
   }
 
   async onStart(canvas) {
-    const { app, audioProcessor, debug, isGba, romBytes, romMd5, vba } = this;
+    const { app, audioProcessor, debug, gbBorder, isGba, romBytes, romMd5, vba } = this;
 
-    this.vbaGraphics = new VbaGraphics(isGba, vba, canvas);
+    this.vbaGraphics = new VbaGraphics(isGba, vba, canvas, gbBorder === 1);
     this.vbaGraphics.initScreen();
     this.vbaInterface = new VbaInterface(
       this.FPS,
@@ -310,7 +312,8 @@ export class Emulator extends AppWrapper {
       this.rtc, 
       this.mirroring,
       this.gbHwType,
-      this.gbColors);
+      this.gbColors,
+      this.gbBorder);
 
     // Hack to ignore always saving
     setTimeout(() => {

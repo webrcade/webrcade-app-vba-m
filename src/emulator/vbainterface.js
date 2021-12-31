@@ -30,7 +30,7 @@ class VbaInterface {
     return gbaninja._VBA_get_emulating();
   };
 
-  VBA_start(isGba, flashSize = -1, saveType = -1, rtc = false, mirroring = false, gbHwType = 0, gbColors = 0) {
+  VBA_start(isGba, flashSize = -1, saveType = -1, rtc = false, mirroring = false, gbHwType = 0, gbColors = 0, gbBorder = 0) {
     const { gbaninja } = this;
     return gbaninja._VBA_start(
       isGba,
@@ -39,7 +39,8 @@ class VbaInterface {
       rtc ? 1 : 0, 
       mirroring ? 1 : 0,
       gbHwType,
-      gbColors);
+      gbColors,
+      gbBorder);
   };
 
   VBA_do_cycles(cycles) {
@@ -280,6 +281,10 @@ class VbaInterface {
   dbgOutput(textPointer8, unknownPointer8) {
     return console.log("dbgOutput", textPointer8, unknownPointer8);
   };
+
+  setGbBorderOn() {
+    this.vbaGraphics.setGbBorderOn();
+  }
 };
 
 export { VbaInterface };

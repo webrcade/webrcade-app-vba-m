@@ -86,6 +86,9 @@ class App extends WebrcadeApp {
       // Get GB colors
       const gbColors = appProps.colors !== undefined ? parseInt(appProps.colors) : 0;
 
+      // Get GB border
+      const gbBorder = appProps.border !== undefined ? parseInt(appProps.border) : 0;
+
       // Get the type
       const type = appProps.type;
       if (!type) throw new Error("The application type was not specified.");
@@ -135,7 +138,7 @@ class App extends WebrcadeApp {
           this.isGba, type, uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
           bytes, romMd5, 
           (type === APP_TYPE_KEYS.VBA_M_GB ? gbHwType : 1),
-          gbColors))
+          gbColors, gbBorder))
         .then(() => this.setState({ mode: ModeEnum.LOADED }))
         .catch(msg => {
           LOG.error(msg);
