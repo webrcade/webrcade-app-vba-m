@@ -86,6 +86,9 @@ class App extends WebrcadeApp {
       // Get GB colors
       const gbColors = appProps.colors !== undefined ? parseInt(appProps.colors) : 0;
 
+      // Get GB palette
+      const gbPalette = appProps.palette !== undefined ? parseInt(appProps.palette) : 0;
+
       // Get GB border
       const gbBorder = appProps.border !== undefined ? parseInt(appProps.border) : 0;
 
@@ -138,7 +141,7 @@ class App extends WebrcadeApp {
           this.isGba, type, uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
           bytes, romMd5, 
           (type === APP_TYPE_KEYS.VBA_M_GB ? gbHwType : 1),
-          gbColors, gbBorder))
+          gbColors, gbPalette, gbBorder))
         .then(() => this.setState({ mode: ModeEnum.LOADED }))
         .catch(msg => {
           LOG.error(msg);

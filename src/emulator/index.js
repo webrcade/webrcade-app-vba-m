@@ -32,6 +32,7 @@ export class Emulator extends AppWrapper {
     this.type = null;
     this.gbHwType = 0;
     this.gbColors = 0;
+    this.gbPalette = 0;
     this.gbBorder = 0;
   }
 
@@ -42,7 +43,7 @@ export class Emulator extends AppWrapper {
     return new ScriptAudioProcessor(2, 48000).setDebug(this.debug);
   }
 
-  setRom(isGba, type, name, bytes, md5, gbHwType, gbColors, gbBorder) {
+  setRom(isGba, type, name, bytes, md5, gbHwType, gbColors, gbPalette, gbBorder) {
     this.type = type;
     if (bytes.byteLength === 0) {
       throw new Error("The size is invalid (0 bytes).");
@@ -51,6 +52,7 @@ export class Emulator extends AppWrapper {
     this.isGba = isGba;
     this.gbHwType = gbHwType;
     this.gbColors = gbColors;
+    this.gbPalette = gbPalette;
     this.gbBorder = gbBorder;
 
     this.GBA_CYCLES_PER_SECOND = isGba ? 16777216 : 4194304;
@@ -313,6 +315,7 @@ export class Emulator extends AppWrapper {
       this.mirroring,
       this.gbHwType,
       this.gbColors,
+      this.gbPalette,
       this.gbBorder);
 
     // Hack to ignore always saving

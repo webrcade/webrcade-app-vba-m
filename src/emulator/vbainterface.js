@@ -30,7 +30,7 @@ class VbaInterface {
     return gbaninja._VBA_get_emulating();
   };
 
-  VBA_start(isGba, flashSize = -1, saveType = -1, rtc = false, mirroring = false, gbHwType = 0, gbColors = 0, gbBorder = 0) {
+  VBA_start(isGba, flashSize = -1, saveType = -1, rtc = false, mirroring = false, gbHwType = 0, gbColors = 0, gbPalette, gbBorder = 0) {
     const { gbaninja } = this;
     return gbaninja._VBA_start(
       isGba,
@@ -40,6 +40,7 @@ class VbaInterface {
       mirroring ? 1 : 0,
       gbHwType,
       gbColors,
+      gbPalette,
       gbBorder);
   };
 
