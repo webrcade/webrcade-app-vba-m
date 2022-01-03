@@ -48,7 +48,7 @@ The Game Boy application for [webЯcade](https://www.webrcade.com) is an emulato
 
 <p align="center">
  <a href="https://play.webrcade.com">
-  <img src="https://docs.webrcade.com/assets/images/apps/gb.png" width="90%">
+  <img src="https://docs.webrcade.com/assets/images/apps/gb-border.png" width="90%">
  </a>
  <br>
  <i>Rocket Man (Demo) by Light Games</i>
