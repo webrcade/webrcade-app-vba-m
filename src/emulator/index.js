@@ -239,7 +239,7 @@ export class Emulator extends AppWrapper {
 
   async saveState() {
     const { 
-      checkSaves, isGba, saveStatePath, started, storage, vbaInterface, 
+      checkSaves, isGba, saveStatePath, started, vbaInterface, 
       SRAM_FILE } = this;
     if (!started || !saveStatePath) {
       return;
@@ -255,7 +255,7 @@ export class Emulator extends AppWrapper {
         
         // Store it        
         if (isGba) {
-          await storage.put(saveStatePath, vbaInterface.getSaveBuffer());
+          await this.saveStateToStorage(saveStatePath, vbaInterface.getSaveBuffer());
         } else {
           // GB/GBC uses the file system          
           const FS = this.vba.FS;
@@ -263,7 +263,7 @@ export class Emulator extends AppWrapper {
           if (res.exists) {
             const s = FS.readFile(SRAM_FILE);
             if (s) {
-              await storage.put(saveStatePath, s);
+              await this.saveStateToStorage(saveStatePath, s);
               LOG.info('sram saved: ' + s.length)
             }
           }          
