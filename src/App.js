@@ -1,16 +1,17 @@
 import {
   blobToStr,
-  md5,  
+  md5,
   romNameScorer,
+  settings,
   AppRegistry,
-  FetchAppData, 
-  Resources, 
-  Unzip, 
-  UrlUtil, 
-  WebrcadeApp, 
+  FetchAppData,
+  Resources,
+  Unzip,
+  UrlUtil,
+  WebrcadeApp,
   APP_TYPE_KEYS,
   LOG,
-  TEXT_IDS 
+  TEXT_IDS
 } from '@webrcade/app-common'
 import { Emulator } from './emulator'
 
@@ -40,7 +41,7 @@ class App extends WebrcadeApp {
           if ((rotInt % 90) === 0) {
             this.rotValue = (rotInt / 90) % 4;
             if (this.rotValue %2 !== 0) {
-              this.rotSideways = true;              
+              this.rotSideways = true;
             }
           } else {
             LOG.error('rotation value is not a 90 degree value: ' + rot);
@@ -48,7 +49,7 @@ class App extends WebrcadeApp {
         } else {
           LOG.error('rotation value is not a number: ' + rot);
         }
-      }      
+      }
 
       // Get flash size
       let flashSize = -1;
@@ -60,7 +61,7 @@ class App extends WebrcadeApp {
         } else {
           LOG.error('flashSize value is not a number: ' + flash);
         }
-      }      
+      }
 
       // Get save type
       let saveType = -1;
@@ -72,7 +73,7 @@ class App extends WebrcadeApp {
         } else {
           LOG.error('saveType value is not a number: ' + save);
         }
-      }      
+      }
 
       // Get RTC
       const rtc = appProps.rtc !== undefined ? appProps.rtc === true : false;
@@ -100,18 +101,18 @@ class App extends WebrcadeApp {
       // Create the emulator
       if (this.emulator === null) {
         this.emulator = new Emulator(
-          this, 
-          this.rotValue, 
+          this,
+          this.rotValue,
           this.isDebug(),
-          flashSize, 
-          saveType, 
-          rtc, 
+          flashSize,
+          saveType,
+          rtc,
           mirroring
         );
       }
 
       const { emulator } = this;
-      
+
       // Determine extensions
       const exts = [
         ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, false),
@@ -130,6 +131,8 @@ class App extends WebrcadeApp {
       let romBlob = null;
       let romMd5 = null;
       emulator.loadEmscriptenModule()
+        .then(() => settings.load())
+        // .then(() => settings.setBilinearFilterEnabled(true))
         .then(() => new FetchAppData(rom).fetch())
         .then(response => { LOG.info('downloaded.'); return response.blob() })
         .then(blob => uz.unzip(blob, extsNotUnique, exts, romNameScorer))
@@ -139,7 +142,7 @@ class App extends WebrcadeApp {
         .then(() => new Response(romBlob).arrayBuffer())
         .then(bytes => emulator.setRom(
           this.isGba, type, uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
-          bytes, romMd5, 
+          bytes, romMd5,
           (type === APP_TYPE_KEYS.VBA_M_GB ? gbHwType : 1),
           gbColors, gbPalette, gbBorder))
         .then(() => this.setState({ mode: ModeEnum.LOADED }))
@@ -179,7 +182,7 @@ class App extends WebrcadeApp {
     if (rotValue !== 0) {
       className += "rotate" + 90 * rotValue;
     }
-    if (rotSideways) {      
+    if (rotSideways) {
       if (className.length > 0) {
         className += " ";
       }
@@ -192,7 +195,7 @@ class App extends WebrcadeApp {
       className += "screen-gb";
     }
     return (
-      <canvas className={className} ref={canvas => { this.canvas = canvas; }} id="screen"></canvas>
+      <canvas style={this.getCanvasStyles()} className={className} ref={canvas => { this.canvas = canvas; }} id="screen"></canvas>
     );
   }
 
@@ -204,7 +207,7 @@ class App extends WebrcadeApp {
       <>
         { super.render()}
         { mode === ModeEnum.LOADING ? this.renderLoading() : null}
-        { mode === ModeEnum.PAUSE ? this.renderPauseScreen() : null}        
+        { mode === ModeEnum.PAUSE ? this.renderPauseScreen() : null}
         { mode === ModeEnum.LOADED || mode === ModeEnum.PAUSE  ? this.renderCanvas() : null}
       </>
     );
