@@ -11,10 +11,10 @@ import {
   WebrcadeApp,
   APP_TYPE_KEYS,
   LOG,
-  TEXT_IDS
-} from '@webrcade/app-common'
-import { Emulator } from './emulator'
-import { EmulatorPauseScreen } from './pause'
+  TEXT_IDS,
+} from '@webrcade/app-common';
+import { Emulator } from './emulator';
+import { EmulatorPauseScreen } from './pause';
 
 import './App.scss';
 
@@ -32,16 +32,16 @@ class App extends WebrcadeApp {
     try {
       // Get the ROM location that was specified
       const rom = appProps.rom;
-      if (!rom) throw new Error("A ROM file was not specified.");
+      if (!rom) throw new Error('A ROM file was not specified.');
 
       // Get the ROM rotation (if applicable)
       const rot = appProps.rotation;
       if (rot) {
         const rotInt = parseInt(rot);
         if (!isNaN(rotInt)) {
-          if ((rotInt % 90) === 0) {
+          if (rotInt % 90 === 0) {
             this.rotValue = (rotInt / 90) % 4;
-            if (this.rotValue %2 !== 0) {
+            if (this.rotValue % 2 !== 0) {
               this.rotSideways = true;
             }
           } else {
@@ -80,24 +80,29 @@ class App extends WebrcadeApp {
       const rtc = appProps.rtc !== undefined ? appProps.rtc === true : false;
 
       // Get Mirroring
-      const mirroring = appProps.mirroring !== undefined ? appProps.mirroring === true : false;
+      const mirroring =
+        appProps.mirroring !== undefined ? appProps.mirroring === true : false;
 
       // Get GB hardware type
-      const gbHwType = appProps.hwType !== undefined ? parseInt(appProps.hwType) : 0;
+      const gbHwType =
+        appProps.hwType !== undefined ? parseInt(appProps.hwType) : 0;
 
       // Get GB colors
-      const gbColors = appProps.colors !== undefined ? parseInt(appProps.colors) : 0;
+      const gbColors =
+        appProps.colors !== undefined ? parseInt(appProps.colors) : 0;
 
       // Get GB palette
-      const gbPalette = appProps.palette !== undefined ? parseInt(appProps.palette) : 0;
+      const gbPalette =
+        appProps.palette !== undefined ? parseInt(appProps.palette) : 0;
 
       // Get GB border
-      const gbBorder = appProps.border !== undefined ? parseInt(appProps.border) : 0;
+      const gbBorder =
+        appProps.border !== undefined ? parseInt(appProps.border) : 0;
 
       // Get the type
       const type = appProps.type;
-      if (!type) throw new Error("The application type was not specified.");
-      this.isGba = (type === APP_TYPE_KEYS.VBA_M_GBA);
+      if (!type) throw new Error('The application type was not specified.');
+      this.isGba = type === APP_TYPE_KEYS.VBA_M_GBA;
 
       // Create the emulator
       if (this.emulator === null) {
@@ -108,7 +113,7 @@ class App extends WebrcadeApp {
           flashSize,
           saveType,
           rtc,
-          mirroring
+          mirroring,
         );
       }
 
@@ -116,42 +121,87 @@ class App extends WebrcadeApp {
 
       // Determine extensions
       const exts = [
-        ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, false),
-        ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GB, true, false),
-        ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBC, true, false),
+        ...AppRegistry.instance.getExtensions(
+          APP_TYPE_KEYS.VBA_M_GBA,
+          true,
+          false,
+        ),
+        ...AppRegistry.instance.getExtensions(
+          APP_TYPE_KEYS.VBA_M_GB,
+          true,
+          false,
+        ),
+        ...AppRegistry.instance.getExtensions(
+          APP_TYPE_KEYS.VBA_M_GBC,
+          true,
+          false,
+        ),
       ];
       const extsNotUnique = [
         ...new Set([
-          ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBA, true, true),
-          ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GB, true, true),
-          ...AppRegistry.instance.getExtensions(APP_TYPE_KEYS.VBA_M_GBC, true, true),
-        ])
+          ...AppRegistry.instance.getExtensions(
+            APP_TYPE_KEYS.VBA_M_GBA,
+            true,
+            true,
+          ),
+          ...AppRegistry.instance.getExtensions(
+            APP_TYPE_KEYS.VBA_M_GB,
+            true,
+            true,
+          ),
+          ...AppRegistry.instance.getExtensions(
+            APP_TYPE_KEYS.VBA_M_GBC,
+            true,
+            true,
+          ),
+        ]),
       ];
       // Load emscripten and the ROM
       const uz = new Unzip().setDebug(this.isDebug());
       let romBlob = null;
       let romMd5 = null;
-      emulator.loadEmscriptenModule()
+      emulator
+        .loadEmscriptenModule()
         .then(() => settings.load())
         // .then(() => settings.setBilinearFilterEnabled(true))
         // .then(() => settings.setVsyncEnabled(false))
         .then(() => new FetchAppData(rom).fetch())
-        .then(response => { LOG.info('downloaded.'); return response.blob() })
-        .then(blob => uz.unzip(blob, extsNotUnique, exts, romNameScorer))
-        .then(blob => { romBlob = blob; return blob; })
-        .then(blob => blobToStr(blob))
-        .then(str => { romMd5 = md5(str); })
-        .then(() => new Response(romBlob).arrayBuffer())
-        .then(bytes => emulator.setRom(
-          this.isGba, type, uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
-          bytes, romMd5,
-          (type === APP_TYPE_KEYS.VBA_M_GB ? gbHwType : 1),
-          gbColors, gbPalette, gbBorder))
-        .then(() => this.setState({ mode: ModeEnum.LOADED }))
-        .catch(msg => {
-          LOG.error(msg);
-          this.exit(this.isDebug() ? msg : Resources.getText(TEXT_IDS.ERROR_RETRIEVING_GAME));
+        .then((response) => {
+          LOG.info('downloaded.');
+          return response.blob();
         })
+        .then((blob) => uz.unzip(blob, extsNotUnique, exts, romNameScorer))
+        .then((blob) => {
+          romBlob = blob;
+          return blob;
+        })
+        .then((blob) => blobToStr(blob))
+        .then((str) => {
+          romMd5 = md5(str);
+        })
+        .then(() => new Response(romBlob).arrayBuffer())
+        .then((bytes) =>
+          emulator.setRom(
+            this.isGba,
+            type,
+            uz.getName() ? uz.getName() : UrlUtil.getFileName(rom),
+            bytes,
+            romMd5,
+            type === APP_TYPE_KEYS.VBA_M_GB ? gbHwType : 1,
+            gbColors,
+            gbPalette,
+            gbBorder,
+          ),
+        )
+        .then(() => this.setState({ mode: ModeEnum.LOADED }))
+        .catch((msg) => {
+          LOG.error(msg);
+          this.exit(
+            this.isDebug()
+              ? msg
+              : Resources.getText(TEXT_IDS.ERROR_RETRIEVING_GAME),
+          );
+        });
     } catch (e) {
       this.exit(e);
     }
@@ -197,24 +247,31 @@ class App extends WebrcadeApp {
   renderCanvas() {
     const { rotValue, rotSideways } = this;
 
-    let className = "";
+    let className = '';
     if (rotValue !== 0) {
-      className += "rotate" + 90 * rotValue;
+      className += 'rotate' + 90 * rotValue;
     }
     if (rotSideways) {
       if (className.length > 0) {
-        className += " ";
+        className += ' ';
       }
-      className += "sideways";
+      className += 'sideways';
     }
     if (!this.isGba) {
       if (className.length > 0) {
-        className += " ";
+        className += ' ';
       }
-      className += "screen-gb";
+      className += 'screen-gb';
     }
     return (
-      <canvas style={this.getCanvasStyles()} className={className} ref={canvas => { this.canvas = canvas; }} id="screen"></canvas>
+      <canvas
+        style={this.getCanvasStyles()}
+        className={className}
+        ref={(canvas) => {
+          this.canvas = canvas;
+        }}
+        id="screen"
+      ></canvas>
     );
   }
 
@@ -224,10 +281,12 @@ class App extends WebrcadeApp {
 
     return (
       <>
-        { super.render()}
-        { mode === ModeEnum.LOADING ? this.renderLoading() : null}
-        { mode === ModeEnum.PAUSE ? this.renderPauseScreen() : null}
-        { mode === ModeEnum.LOADED || mode === ModeEnum.PAUSE  ? this.renderCanvas() : null}
+        {super.render()}
+        {mode === ModeEnum.LOADING ? this.renderLoading() : null}
+        {mode === ModeEnum.PAUSE ? this.renderPauseScreen() : null}
+        {mode === ModeEnum.LOADED || mode === ModeEnum.PAUSE
+          ? this.renderCanvas()
+          : null}
       </>
     );
   }

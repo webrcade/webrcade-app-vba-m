@@ -3,15 +3,22 @@ import {
   DisplayLoop,
   ScriptAudioProcessor,
   CIDS,
-  LOG
-} from "@webrcade/app-common"
+  LOG,
+} from '@webrcade/app-common';
 
-import { VbaGraphics } from "./vbagraphics"
-import { VbaInterface } from './vbainterface'
+import { VbaGraphics } from './vbagraphics';
+import { VbaInterface } from './vbainterface';
 
 export class Emulator extends AppWrapper {
-  constructor(app, rotValue, debug = false,
-    flashSize = -1, saveType = -1, rtc = false, mirroring = false) {
+  constructor(
+    app,
+    rotValue,
+    debug = false,
+    flashSize = -1,
+    saveType = -1,
+    rtc = false,
+    mirroring = false,
+  ) {
     super(app, debug);
 
     this.vba = null;
@@ -37,17 +44,27 @@ export class Emulator extends AppWrapper {
   }
 
   FPS = 59.7275;
-  SRAM_FILE = "/tmp/game.srm";
+  SRAM_FILE = '/tmp/game.srm';
   SAVE_NAME = 'sav';
 
   createAudioProcessor() {
     return new ScriptAudioProcessor(2, 48000).setDebug(this.debug);
   }
 
-  setRom(isGba, type, name, bytes, md5, gbHwType, gbColors, gbPalette, gbBorder) {
+  setRom(
+    isGba,
+    type,
+    name,
+    bytes,
+    md5,
+    gbHwType,
+    gbColors,
+    gbPalette,
+    gbBorder,
+  ) {
     this.type = type;
     if (bytes.byteLength === 0) {
-      throw new Error("The size is invalid (0 bytes).");
+      throw new Error('The size is invalid (0 bytes).');
     }
 
     this.isGba = isGba;
@@ -78,7 +95,8 @@ export class Emulator extends AppWrapper {
 
     if (controllers.isControlDown(0, CIDS.ESCAPE)) {
       if (this.pause(true)) {
-        controllers.waitUntilControlReleased(0, CIDS.ESCAPE)
+        controllers
+          .waitUntilControlReleased(0, CIDS.ESCAPE)
           .then(() => this.showPauseMenu());
         return;
       }
@@ -86,7 +104,7 @@ export class Emulator extends AppWrapper {
 
     let input = 0;
     if (controllers.isControlDown(0, CIDS.UP)) {
-      switch(rotValue) {
+      switch (rotValue) {
         case 0:
           input |= 64;
           break;
@@ -102,9 +120,8 @@ export class Emulator extends AppWrapper {
         default:
           break;
       }
-    }
-    else if (controllers.isControlDown(0, CIDS.DOWN)) {
-      switch(rotValue) {
+    } else if (controllers.isControlDown(0, CIDS.DOWN)) {
+      switch (rotValue) {
         case 0:
           input |= 128;
           break;
@@ -122,7 +139,7 @@ export class Emulator extends AppWrapper {
       }
     }
     if (controllers.isControlDown(0, CIDS.RIGHT)) {
-      switch(rotValue) {
+      switch (rotValue) {
         case 0:
           input |= 16;
           break;
@@ -138,9 +155,8 @@ export class Emulator extends AppWrapper {
         default:
           break;
       }
-    }
-    else if (controllers.isControlDown(0, CIDS.LEFT)) {
-      switch(rotValue) {
+    } else if (controllers.isControlDown(0, CIDS.LEFT)) {
+      switch (rotValue) {
         case 0:
           input |= 32;
           break;
@@ -157,10 +173,16 @@ export class Emulator extends AppWrapper {
           break;
       }
     }
-    if (controllers.isControlDown(0, CIDS.B) || controllers.isControlDown(0, CIDS.X) ) {
+    if (
+      controllers.isControlDown(0, CIDS.B) ||
+      controllers.isControlDown(0, CIDS.X)
+    ) {
       input |= 1;
     }
-    if (controllers.isControlDown(0, CIDS.A) || controllers.isControlDown(0, CIDS.Y)) {
+    if (
+      controllers.isControlDown(0, CIDS.A) ||
+      controllers.isControlDown(0, CIDS.Y)
+    ) {
       input |= 2;
     }
     if (controllers.isControlDown(0, CIDS.SELECT)) {
@@ -185,9 +207,9 @@ export class Emulator extends AppWrapper {
     window.Module = {
       preRun: [],
       postRun: [],
-      onAbort: msg => app.exit(msg),
+      onAbort: (msg) => app.exit(msg),
       onExit: () => app.exit(),
-    }
+    };
 
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
@@ -197,13 +219,13 @@ export class Emulator extends AppWrapper {
       script.onload = () => {
         LOG.info('Script loaded.');
         if (window.gbaninja) {
-          window.gbaninja.then(vba => {
+          window.gbaninja.then((vba) => {
             this.vba = vba;
             window.vba = vba;
             resolve();
           });
         } else {
-          reject("An error occurred attempting to load the GBA engine.");
+          reject('An error occurred attempting to load the GBA engine.');
         }
       };
     });
@@ -300,8 +322,13 @@ export class Emulator extends AppWrapper {
 
   async saveState() {
     const {
-      checkSaves, isGba, saveStatePath, started, vbaInterface,
-      SRAM_FILE } = this;
+      checkSaves,
+      isGba,
+      saveStatePath,
+      started,
+      vbaInterface,
+      SRAM_FILE,
+    } = this;
     if (!started || !saveStatePath) {
       return;
     }
@@ -327,7 +354,7 @@ export class Emulator extends AppWrapper {
             if (s) {
               //await this.saveInOldFormat(s);
               await this.saveInNewFormat(s);
-              LOG.info('sram saved: ' + s.length)
+              LOG.info('sram saved: ' + s.length);
             }
           }
         }
@@ -346,7 +373,16 @@ export class Emulator extends AppWrapper {
   }
 
   async onStart(canvas) {
-    const { app, audioProcessor, debug, gbBorder, isGba, romBytes, romMd5, vba } = this;
+    const {
+      app,
+      audioProcessor,
+      debug,
+      gbBorder,
+      isGba,
+      romBytes,
+      romMd5,
+      vba,
+    } = this;
 
     this.vbaGraphics = new VbaGraphics(isGba, vba, canvas, gbBorder === 1);
     this.vbaGraphics.initScreen();
@@ -355,8 +391,10 @@ export class Emulator extends AppWrapper {
       vba,
       romBytes,
       this.vbaGraphics,
-      () => { return this.controllerState; },
-      audioProcessor
+      () => {
+        return this.controllerState;
+      },
+      audioProcessor,
     ).setDebug(this.debug);
 
     // For callbacks from Emscripten
@@ -371,7 +409,7 @@ export class Emulator extends AppWrapper {
 
     // Start VBA
     this.vbaInterface.VBA_start(
-      isGba ?  1 : 0, // isGba
+      isGba ? 1 : 0, // isGba
       this.flashSize,
       this.saveType,
       this.rtc,
@@ -379,13 +417,14 @@ export class Emulator extends AppWrapper {
       this.gbHwType,
       this.gbColors,
       this.gbPalette,
-      this.gbBorder);
+      this.gbBorder,
+    );
 
     // Hack to ignore always saving
     setTimeout(() => {
       this.vbaInterface.VBA_reset_systemSaveUpdateCounter();
       this.checkSaves = true;
-    }, 5 * 1000 );
+    }, 5 * 1000);
 
     // Start the audio processor
     this.audioProcessor.start();
