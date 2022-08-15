@@ -2,6 +2,7 @@ import {
   blobToStr,
   md5,
   romNameScorer,
+  setMessageAnchorId,
   settings,
   AppRegistry,
   FetchAppData,
@@ -28,6 +29,9 @@ class App extends WebrcadeApp {
     super.componentDidMount();
 
     const { appProps, ModeEnum } = this;
+
+    // Set anchor for messages
+    setMessageAnchorId('screen');
 
     try {
       // Get the ROM location that was specified

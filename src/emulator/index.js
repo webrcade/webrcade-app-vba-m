@@ -431,6 +431,9 @@ export class Emulator extends AppWrapper {
 
     this.lastTime = Date.now();
 
+    // Enabled showing messages
+    this.setShowMessageEnabled(true);
+
     // Start the display loop
     this.displayLoop.start(() => {
       this.frame();
