@@ -276,6 +276,9 @@ export class Emulator extends AppWrapper {
             break;
           }
         }
+
+        // Cache the initial files
+        await this.getSaveManager().checkFilesChanged(files);
       }
 
       if (s) {
@@ -308,16 +311,20 @@ export class Emulator extends AppWrapper {
   async saveInNewFormat(s) {
     const { saveStatePath, SAVE_NAME } = this;
 
-    await this.getSaveManager().save(
-      saveStatePath,
-      [
-        {
-          name: SAVE_NAME,
-          content: s,
-        },
-      ],
-      this.saveMessageCallback,
-    );
+    const files = [
+      {
+        name: SAVE_NAME,
+        content: s,
+      },
+    ];
+
+    if (await this.getSaveManager().checkFilesChanged(files)) {
+      await this.getSaveManager().save(
+        saveStatePath,
+        files,
+        this.saveMessageCallback,
+      );
+    }
   }
 
   async saveState() {
