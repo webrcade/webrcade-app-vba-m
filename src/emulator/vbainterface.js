@@ -44,6 +44,7 @@ class VbaInterface {
     gbColors = 0,
     gbPalette,
     gbBorder = 0,
+    disableLookup = false
   ) {
     const { gbaninja } = this;
     return gbaninja._VBA_start(
@@ -56,6 +57,7 @@ class VbaInterface {
       gbColors,
       gbPalette,
       gbBorder,
+      disableLookup
     );
   }
 
