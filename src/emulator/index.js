@@ -18,6 +18,7 @@ export class Emulator extends AppWrapper {
     saveType = -1,
     rtc = false,
     mirroring = false,
+    disableLookup = false
   ) {
     super(app, debug);
 
@@ -41,6 +42,7 @@ export class Emulator extends AppWrapper {
     this.gbColors = 0;
     this.gbPalette = 0;
     this.gbBorder = 0;
+    this.disableLookup = disableLookup;
   }
 
   FPS = 59.7275;
@@ -425,6 +427,7 @@ export class Emulator extends AppWrapper {
       this.gbColors,
       this.gbPalette,
       this.gbBorder,
+      this.disableLookup
     );
 
     // Hack to ignore always saving

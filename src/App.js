@@ -103,6 +103,10 @@ class App extends WebrcadeApp {
       const gbBorder =
         appProps.border !== undefined ? parseInt(appProps.border) : 0;
 
+      // Disable cart lookup
+      const disableLookup =
+        appProps.disableLookup !== undefined ? appProps.disableLookup === true : false;
+
       // Get the type
       const type = appProps.type;
       if (!type) throw new Error('The application type was not specified.');
@@ -118,6 +122,7 @@ class App extends WebrcadeApp {
           saveType,
           rtc,
           mirroring,
+          disableLookup
         );
       }
 
