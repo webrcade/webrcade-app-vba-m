@@ -9,6 +9,8 @@ import {
 import { VbaGraphics } from './vbagraphics';
 import { VbaInterface } from './vbainterface';
 
+const STATE_FILE_PATH = "/state.out";
+
 export class Emulator extends AppWrapper {
   constructor(
     app,
@@ -34,6 +36,7 @@ export class Emulator extends AppWrapper {
     this.saveType = saveType;
     this.rtc = rtc;
     this.mirroring = mirroring;
+    this.saveStatePrefix = null;
     this.saveStatePath = null;
     this.checkSaves = false;
     this.isGba = false;
@@ -376,6 +379,66 @@ export class Emulator extends AppWrapper {
     }
   }
 
+  async getStateSlots(showStatus = true) {
+    return await this.getSaveManager().getStateSlots(
+      this.saveStatePrefix, showStatus ? this.saveMessageCallback : null
+    );
+  }
+
+  async saveStateForSlot(slot) {
+    const { vbaInterface } = this;
+
+    vbaInterface.VBA_emuWriteState();
+
+    let s = null;
+    try {
+
+      const FS = this.vba.FS;
+      try {
+        s = FS.readFile(STATE_FILE_PATH);
+      } catch (e) {}
+
+      if (s) {
+        await this.getSaveManager().saveState(
+          this.saveStatePrefix, slot, s,
+          this.canvas,
+          this.saveMessageCallback);
+      }
+    } catch (e) {
+      LOG.error('Error saving state: ' + e);
+    }
+
+    return true;
+  }
+
+  async loadStateForSlot(slot) {
+    const { vbaInterface } = this;
+
+    try {
+      const state = await this.getSaveManager().loadState(
+        this.saveStatePrefix, slot, this.saveMessageCallback);
+
+      if (state) {
+        const FS = this.vba.FS;
+        FS.writeFile(STATE_FILE_PATH, state);
+        vbaInterface.VBA_emuReadState();
+      }
+    } catch (e) {
+      LOG.error('Error loading state: ' + e);
+    }
+    return true;
+  }
+
+  async deleteStateForSlot(slot, showStatus = true) {
+    try {
+      await this.getSaveManager().deleteState(
+        this.saveStatePrefix, slot, showStatus ? this.saveMessageCallback : null);
+    } catch (e) {
+      LOG.error('Error deleting state: ' + e);
+    }
+    return true;
+  }
+
   frame() {
     const { vbaInterface, GBA_CYCLES_PER_FRAME } = this;
     vbaInterface.VBA_do_cycles(GBA_CYCLES_PER_FRAME);
@@ -393,6 +456,7 @@ export class Emulator extends AppWrapper {
       vba,
     } = this;
 
+    this.canvas = canvas;
     this.vbaGraphics = new VbaGraphics(isGba, vba, canvas, gbBorder === 1);
     this.vbaGraphics.initScreen();
     this.vbaInterface = new VbaInterface(
@@ -410,7 +474,8 @@ export class Emulator extends AppWrapper {
     window.VBAInterface = this.vbaInterface;
 
     // Load save state
-    this.saveStatePath = app.getStoragePath(`${romMd5}/sav`);
+    this.saveStatePrefix = app.getStoragePath(`${romMd5}/`);
+    this.saveStatePath = `${this.saveStatePrefix}sav`;
     await this.loadState();
 
     // Create display loop

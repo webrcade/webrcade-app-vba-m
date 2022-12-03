@@ -156,6 +156,16 @@ class VbaInterface {
     return gbaninja._VBA_agbPrintFlush();
   }
 
+  VBA_emuWriteState() {
+    const { gbaninja } = this;
+    return gbaninja._VBA_emuWriteState();
+  }
+
+  VBA_emuReadState() {
+    const { gbaninja } = this;
+    return gbaninja._VBA_emuReadState();
+  }
+
   // ------- VBA EXIT POINTS --------
 
   NYI(feature) {
