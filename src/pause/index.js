@@ -74,7 +74,7 @@ export class EmulatorPauseScreen extends Component {
         onClick={() => {
           this.setState({ mode: ModeEnum.CONTROLS });
         }}
-      />,
+      />
     ];
 
     if (cloudEnabled) {
