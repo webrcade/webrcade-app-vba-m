@@ -398,11 +398,21 @@ export class Emulator extends AppWrapper {
         s = FS.readFile(STATE_FILE_PATH);
       } catch (e) {}
 
+      const props = {}
+      if (this.rotValue !== 0) {
+        props.transform = `rotate(${this.rotValue * 90}deg)`;
+      }
+      let ar = 1.5;
+      if (!this.isGba) {
+        ar = this.gbBorder ? 1.15 : 1.11;
+      }
+      props.aspectRatio = `${ar}`;
+
       if (s) {
         await this.getSaveManager().saveState(
           this.saveStatePrefix, slot, s,
           this.canvas,
-          this.saveMessageCallback);
+          this.saveMessageCallback, null, props);
       }
     } catch (e) {
       LOG.error('Error saving state: ' + e);
