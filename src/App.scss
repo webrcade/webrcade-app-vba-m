@@ -6,28 +6,28 @@
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  width: 96vw;
-  height: 96vh;
-  max-width: calc(96vh * 1.5);
-  max-height: calc(96vw * 0.6667);
+  // width: 96vw;
+  // height: 96vh;
+  // max-width: calc(96vh * 1.5);
+  // max-height: calc(96vw * 0.6667);
   // border: 1px solid red;
 }
 
 .screen-gb {
-  max-width: calc(96vh * 1.11) !important;
-  max-height: calc(96vw * 0.9) !important;
+  // max-width: calc(96vh * 1.11) !important;
+  // max-height: calc(96vw * 0.9) !important;
 }
 
 .screen-gb-border {
-  max-width: calc(96vh * 1.15) !important;
-  max-height: calc(96vw * 0.8695) !important;
+  // max-width: calc(96vh * 1.15) !important;
+  // max-height: calc(96vw * 0.8695) !important;
 }
 
 .sideways {
-  width: 96vh !important;
-  height: 96vw !important;
-  max-width: calc(96vw * 1.5) !important;
-  max-height: calc(96vh * 0.6667) !important;
+  // width: 96vh !important;
+  // height: 96vw !important;
+  // max-width: calc(96vw * 1.5) !important;
+  // max-height: calc(96vh * 0.6667) !important;
 }
 
 .rotate90 {

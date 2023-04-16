@@ -52,6 +52,20 @@ export class Emulator extends AppWrapper {
   SRAM_FILE = '/tmp/game.srm';
   SAVE_NAME = 'sav';
 
+  isScreenRotated() {
+    return this.rotValue === 1 || this.rotValue === 3;
+  }
+
+  getDefaultAspectRatio() {
+    //return 1.333;
+    let ar = 1.5;
+    if (!this.isGba) {
+      ar = this.gbBorder ? 1.15 : 1.11;
+    }
+
+    return ar;
+  }
+
   createAudioProcessor() {
     return new ScriptAudioProcessor(2, 48000).setDebug(this.debug);
   }
@@ -402,10 +416,11 @@ export class Emulator extends AppWrapper {
       if (this.rotValue !== 0) {
         props.transform = `rotate(${this.rotValue * 90}deg)`;
       }
-      let ar = 1.5;
-      if (!this.isGba) {
-        ar = this.gbBorder ? 1.15 : 1.11;
-      }
+      // let ar = 1.5;
+      // if (!this.isGba) {
+      //   ar = this.gbBorder ? 1.15 : 1.11;
+      // }
+      let ar = this.getDefaultAspectRatio();
       props.aspectRatio = `${ar}`;
 
       if (s) {
