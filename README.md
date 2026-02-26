@@ -8,7 +8,23 @@ This repository contains [webЯcade](https://www.webrcade.com) applications for 
 * [Nintendo Game Boy Color](#nintendo-game-boy-color-application)
 * [Nintendo Game Boy](#nintendo-game-boy-application)
 
-The underlying emulators is a forked version of [SameBoy](https://github.com/LIJI32/SameBoy).
+The underlying emulators are [forked versions](https://github.com/raz0red/gba.ninja/tree/webrcade) of [gba.ninja](https://github.com/raz0red/gba.ninja). Gba.ninja is an Emscripten port of [VisualBoyAdvance-M](https://vba-m.com/).
+
+## Nintendo Game Boy Advance Application
+
+The Game Boy Advance (GBA) application for [webЯcade](https://www.webrcade.com) is an emulator for the [Game Boy Advance](https://en.wikipedia.org/wiki/Game_Boy_Advance) handheld game console.
+
+<p align="center">
+ <a href="https://play.webrcade.com">
+  <img src="https://docs.webrcade.com/assets/images/apps/gba.png" width="90%">
+ </a>
+ <br>
+ <i>Anguna by Bite the Chili productions</i>
+</p>
+
+## Documentation
+
+The [Game Boy Advance Application Documentation](https://docs.webrcade.com/apps/emulators/gba/) includes [keyboard](https://docs.webrcade.com/apps/emulators/gba/#keyboard) and [gamepad](https://docs.webrcade.com/apps/emulators/gba/#gamepad) control mappings, information related to [battery-backed SRAM](https://docs.webrcade.com/apps/emulators/gba/#battery-backed-sram) support, and details regarding the use of the emulator within a [webЯcade feed](https://docs.webrcade.com/apps/emulators/gba/#feed). 
 
 ## Nintendo Game Boy Color Application
 
@@ -52,4 +68,4 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 ---
 
-The license presented above is limited to the application for [webЯcade](https://www.webrcade.com). The underlying [SameBoy](https://github.com/LIJI32/SameBoy) projects retain their own specific licensing.
+The license presented above is limited to the Game Boy Advance application for [webЯcade](https://www.webrcade.com). The underlying [gba.ninja](https://github.com/raz0red/gba.ninja) and [VisualBoyAdvance-M](https://vba-m.com/) projects retain their own specific licensing.
