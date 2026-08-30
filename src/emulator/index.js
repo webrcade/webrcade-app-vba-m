@@ -1,5 +1,5 @@
 import {
-  AppWrapper,
+  BasicAppWrapper,
   DisplayLoop,
   ScriptAudioProcessor,
   CIDS,
@@ -11,7 +11,7 @@ import { VbaInterface } from './vbainterface';
 
 const STATE_FILE_PATH = "/state.out";
 
-export class Emulator extends AppWrapper {
+export class Emulator extends BasicAppWrapper {
   constructor(
     app,
     rotValue,
@@ -23,6 +23,10 @@ export class Emulator extends AppWrapper {
     disableLookup = false
   ) {
     super(app, debug);
+
+    // Read by the shared TouchOverlay component (webrcade-app-common) to
+    // reach the running emulator instance.
+    window.emulator = this;
 
     this.vba = null;
     this.romBytes = null;
@@ -106,6 +110,12 @@ export class Emulator extends AppWrapper {
   async onShowPauseMenu() {
     await this.saveState();
   }
+
+  // Base class default pauses on any tap anywhere on screen -- redundant
+  // (and disruptive) now that there's a dedicated Pause button in the
+  // touch overlay. Same override snes9x/fceux/parallel-n64/Coleco/A5200/
+  // Jaguar use for the same reason.
+  createTouchListener() {}
 
   pollControls() {
     const { controllers, rotValue } = this;
@@ -538,6 +548,7 @@ export class Emulator extends AppWrapper {
     this.displayLoop.start(() => {
       this.frame();
       this.pollControls();
+      this.onFrame();
     });
   }
 }
